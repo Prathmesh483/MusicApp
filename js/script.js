@@ -19,7 +19,7 @@ function secondsToMinutesSeconds(seconds) {
 
 async function getSongs(folder) {
     currFolder = folder;
-    let a = await fetch(`https://669b8c62b2a59445929e9195--carvanmusic.netlify.app/${folder}/`);
+    let a = await fetch(`https://carvanmusic.netlify.app/${folder}/`);
     let response = await a.text();
     let div = document.createElement("div");
     div.innerHTML = response;
