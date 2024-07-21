@@ -21,7 +21,7 @@ function secondsToMinutesSeconds(seconds) {
 async function getSongs(folder) {
   currFolder = folder;
   try {
-    let response = await fetch(`https://carvanmusic.netlify.app/${folder}/`, { mode: 'no-cors' });
+    let response = await fetch(`https://cors-anywhere.herokuapp.com/https://carvanmusic.netlify.app/${folder}/`);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
