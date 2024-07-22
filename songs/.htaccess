@@ -1,2 +1,4 @@
 Options +Indexes
 IndexOptions FancyIndexing NameWidth=* DescriptionWidth=*
+
+Header set Access-Control-Allow-Origin *
