@@ -3,7 +3,6 @@ let currentSong = new Audio();
 let songs;
 let currFolder;
 let albumName = document.querySelector(".albumName");
-
 function secondsToMinutesSeconds(seconds) {
   if (isNaN(seconds) || seconds < 0) {
     return "00:00";
@@ -19,51 +18,45 @@ function secondsToMinutesSeconds(seconds) {
 }
 
 async function getSongs(folder) {
-  currFolder = folder;
-  try {
-    let response = await fetch(`https://cors-anywhere.herokuapp.com/https://carvanmusic.netlify.app/${folder}/`);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    let text = await response.text();
+    currFolder = folder;
+    let a = await fetch(`http://127.0.0.1:5500/${folder}/`);
+    let response = await a.text();
     let div = document.createElement("div");
-    div.innerHTML = text;
+    div.innerHTML = response;
     let as = div.getElementsByTagName("a");
     songs = [];
     for (let index = 0; index < as.length; index++) {
-      const element = as[index];
-      if (element.href.endsWith(".mp3")) {
-        songs.push(element.href.split(`/${folder}/`)[1]);
-      }
+        const element = as[index];
+        if (element.href.endsWith(".mp3")) {
+            songs.push(element.href.split(`/${folder}/`)[1]);
+        }
     }
 
     // Show all the songs in the playlist
     let songUL = document.querySelector(".songList").getElementsByTagName("ul")[0];
     songUL.innerHTML = "";
     for (const song of songs) {
-      songUL.innerHTML += `<li><img class="invert" width="34" src="img/music.svg" alt="">
-                <div class="info">
-                    <div>${song.replaceAll("%20", " ")}</div>
-                    <div>Harry</div>
-                </div>
-                <div class="playnow">
-                    <span>Play Now</span>
-                    <img class="invert" src="img/play.svg" alt="">
-                </div> </li>`;
+        songUL.innerHTML += `<li><img class="invert" width="34" src="img/music.svg" alt="">
+            <div class="info">
+                <div>${song.replaceAll("%20", " ")}</div>
+                <div>Harry</div>
+            </div>
+            <div class="playnow">
+                <span>Play Now</span>
+                <img class="invert" src="img/play.svg" alt="">
+            </div> </li>`;
     }
 
     // Attach an event listener to each song
     Array.from(document.querySelector(".songList").getElementsByTagName("li")).forEach(e => {
-      e.addEventListener("click", () => {
-        playMusic(e.querySelector(".info").firstElementChild.innerHTML.trim());
-      });
+        e.addEventListener("click", () => {
+            playMusic(e.querySelector(".info").firstElementChild.innerHTML.trim());
+        });
     });
 
+
     return songs;
-  } catch (error) {
-    console.error('Fetch error: ', error);
-  }
-}
+};
 
 const playMusic = (track, pause = false) => {
   currentSong.src = `/${currFolder}/` + track;
@@ -89,10 +82,12 @@ const playMusic = (track, pause = false) => {
   });
 };
 
+
+
 async function displayAlbums() {
   console.log("displaying albums");
   try {
-    let a = await fetch(`/songs/`);
+    let a = await fetch(`http://127.0.0.1:5500/songs/`);
     let response = await a.text();
     let div = document.createElement("div");
     div.innerHTML = response;
@@ -104,7 +99,7 @@ async function displayAlbums() {
       if (e.href.includes("/songs/") && !e.href.includes(".htaccess")) {
         let folder = e.href.split("/").slice(-1)[0];
         // Get the metadata of the folder
-        let a = await fetch(`/songs/${folder}/info.json`);
+        let a = await fetch(`http://127.0.0.1:5500/songs/${folder}/info.json`);
         let response = await a.json();
         cardContainer.innerHTML += `
                     <div data-folder="${folder}" class="card">
@@ -144,9 +139,9 @@ async function displayAlbums() {
 }
 
 const displayAlbumName = (albumName) => {
-  document.querySelector(
-    ".albumName"
-  ).innerHTML = ` <svg class="invert" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="25" height="25" color="#000000" fill="none">
+              document.querySelector(
+                ".albumName"
+              ).innerHTML = ` <svg class="invert" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="25" height="25" color="#000000" fill="none">
                 <path d="M21.5 12.5C21.5 18.0228 17.0228 22.5 11.5 22.5C5.97715 22.5 1.5 18.0228 1.5 12.5C1.5 6.97715 5.97715 2.5 11.5 2.5C12.6688 2.5 13.7907 2.70051 14.8333 3.06902" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                 <path d="M19.5 9C19.5 10.3807 18.3807 11.5 17 11.5C15.6193 11.5 14.5 10.3807 14.5 9C14.5 7.61929 15.6193 6.5 17 6.5C18.3807 6.5 19.5 7.61929 19.5 9ZM19.5 9V1.5C19.8333 2 20.1 4.1 22.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                 <path d="M13 12.5C13 11.6716 12.3284 11 11.5 11C10.6716 11 10 11.6716 10 12.5C10 13.3284 10.6716 14 11.5 14C12.3284 14 13 13.3284 13 12.5Z" stroke="currentColor" stroke-width="1.5" />
@@ -173,29 +168,52 @@ async function main() {
     }
   });
 
-  currentSong.addEventListener("timeupdate", () => {
-    const currentTime = currentSong.currentTime;
-    const duration = currentSong.duration;
-    const percent = (currentTime / duration) * 100;
+  // // Listen for timeupdate event
+  // currentSong.addEventListener("timeupdate", () => {
+  //   document.querySelector(
+  //     ".songtime"
+  //   ).textContent = `${secondsToMinutesSeconds(
+  //     currentSong.currentTime
+  //   )} / ${secondsToMinutesSeconds(currentSong.duration)}`;
+  //   const circle = document.querySelector(".circle");
+  //   if (circle) {
+  //     circle.style.left =
+  //       (currentSong.currentTime / currentSong.duration) * 100 + "%";
+  //   }
+  // });
 
-    document.querySelector(".songtime").textContent = `${secondsToMinutesSeconds(
-      currentSong.currentTime
-    )} / ${secondsToMinutesSeconds(currentSong.duration)}`;
+  // // Add an event listener to seekbar
+  // document.querySelector(".seekbar").addEventListener("click", (e) => {
+  //   let percent = (e.offsetX / e.target.getBoundingClientRect().width) * 100;
+  //   document.querySelector(".circle").style.left = percent + "%";
+  //   currentSong.currentTime = (currentSong.duration * percent) / 100;
+  // });
 
-    document.querySelector(".seekbar-progress").style.width = `${percent}%`;
-    document.querySelector(".circle").style.left = `${percent}%`;
-  });
+currentSong.addEventListener("timeupdate", () => {
+  const currentTime = currentSong.currentTime;
+  const duration = currentSong.duration;
+  const percent = (currentTime / duration) * 100;
 
-  document.querySelector(".seekbar").addEventListener("click", (e) => {
-    const seekbar = e.target.closest(".seekbar");
-    const rect = seekbar.getBoundingClientRect();
-    const offsetX = e.clientX - rect.left;
-    const percent = (offsetX / seekbar.offsetWidth) * 100;
-    currentSong.currentTime = (percent / 100) * currentSong.duration;
+  document.querySelector(".songtime").textContent = `${secondsToMinutesSeconds(
+    currentSong.currentTime
+  )} / ${secondsToMinutesSeconds(currentSong.duration)}`;
 
-    document.querySelector(".seekbar-progress").style.width = `${percent}%`;
-    document.querySelector(".circle").style.left = `${percent}%`;
-  });
+  document.querySelector(".seekbar-progress").style.width = `${percent}%`;
+  document.querySelector(".circle").style.left = `${percent}%`;
+});
+
+document.querySelector(".seekbar").addEventListener("click", (e) => {
+  const seekbar = e.target.closest(".seekbar");
+  const rect = seekbar.getBoundingClientRect();
+  const offsetX = e.clientX - rect.left;
+  const percent = (offsetX / seekbar.offsetWidth) * 100;
+  currentSong.currentTime = (percent / 100) * currentSong.duration;
+
+  document.querySelector(".seekbar-progress").style.width = `${percent}%`;
+  document.querySelector(".circle").style.left = `${percent}%`;
+});
+
+
 
   // Add an event listener for hamburger
   document.querySelector(".hamburger").addEventListener("click", () => {
